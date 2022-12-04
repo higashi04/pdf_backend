@@ -14,17 +14,17 @@ const registerUser = async (req, res) => {
   const {
     username,
     password,
-    profileType,
     email,
     firstName,
     lastName,
+    congregacion,
   } = req.body;
   if (
     (!username,
     !password,
-    !profileType,
     !email,
     !firstName,
+    !congregacion,
     !lastName)
   ) {
     res.status(400);
@@ -50,8 +50,7 @@ const registerUser = async (req, res) => {
     password: hashedPassword,
     firstName,
     lastName,
-    profileType,
-    active: false,
+    congregacion,
   });
   if (user) {
     res.status(201).json({
@@ -60,8 +59,7 @@ const registerUser = async (req, res) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      profileType: user.profileType,
-      active: user.active,
+      congregacion: user.congregacion,
       token: generateToken(user._id),
     });
   } else {
@@ -80,8 +78,7 @@ const loginUser = async (req, res) => {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      profileType: user.profileType,
-      active: user.active,
+      congregacion: user.congregacion,
       token: generateToken(user._id),
     });
   } else {
