@@ -10,7 +10,6 @@ const generateToken = (id) => {
 };
 
 const registerUser = async (req, res) => {
-  console.log(req.body)
   const {
     username,
     password,

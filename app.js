@@ -9,6 +9,7 @@ const MongoStore = require("connect-mongo");
 const mongoose = require("mongoose");
 
 const usersRoutes = require("./Routes/user");
+const broRoutes = require("./Routes/bros");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -57,6 +58,7 @@ mongoose.connection.on("error", (err) => {
 });
 app.use(cookieParser(process.env.SECRET));
 app.use("/usuario", usersRoutes);
+app.use("/bros", broRoutes);
 
 const port = process.env.PORT || 8080;
 
