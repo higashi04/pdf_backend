@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodeMailer = require("nodemailer");
 const User = require("../models/users");
+const brother = require("../models/bros");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.TOKEN_SECRET, {
@@ -51,6 +52,11 @@ const registerUser = async (req, res) => {
     lastName,
     congregacion,
   });
+  await brother.create({
+    nombre: `${firstName} ${lastName}`,
+    congregacion,
+    activo: true,
+  })
   if (user) {
     res.status(201).json({
       _id: user.id,
