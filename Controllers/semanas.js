@@ -39,7 +39,29 @@ const fetchWeeks = async(req, res) => {
     }
 };
 
+const createRolAcomodadores = async(req, res) => {
+    const findRol = await acomodadores.findOne({semana: req.body.fecha});
+    if(findRol) {
+        res.status(201).json({
+            _id: findRol._id
+        })
+    }else {
+        const newRol = await acomodadores.create({
+            semana: req.body.fecha
+        });
+        if(newRol) {
+            res.status(201).json({
+                _id: newRol._id
+            })
+        } else {
+            res.status(400);
+            throw new Error("Se produjo un error, favor de intentar nuevamente.");
+        }
+    }
+};
+
 module.exports = {
     createWeek,
-    fetchWeeks
+    fetchWeeks,
+    createRolAcomodadores
 }
