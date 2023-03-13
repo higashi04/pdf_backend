@@ -12,10 +12,6 @@ const AcomodadoresSchema = new Schema({
         type: String,
         
     },
-    zoom: {
-        type: String,
-        
-    },
     acomodadores: [
         {
            type: String,
@@ -44,14 +40,11 @@ const AcomodadoresSchema = new Schema({
         type: String,
         
     },
-    aseoEntreSemana: {
+    aseo: {
         type: String,
         
     },
-    aseoFinDeSemana:{
-        type: String,
-        
-    },
+
 
 });
 

@@ -60,8 +60,20 @@ const createRolAcomodadores = async(req, res) => {
     }
 };
 
+const fetchWeekData = async(req, res) => {
+    const {id} = req.body;
+    try {
+        const findRol = await acomodadores.findById(id);
+        console.log(findRol)
+        res.status(200).json(findRol);
+    } catch (error) {
+        res.status(500).json({message: "error de servidor"})
+    }
+};
+
 module.exports = {
     createWeek,
     fetchWeeks,
-    createRolAcomodadores
+    createRolAcomodadores,
+    fetchWeekData
 }
