@@ -36,6 +36,7 @@ const fetchBrothersByCongregation = async(req, res) => {
         const brothersByCongregation = await brothers.find(req.body);
         if(brothersByCongregation) {
             res.status(201).json(brothersByCongregation);
+            // console.log(brothersByCongregation)
         } else {
             res.status(400);
             throw new Error("Se produjo un error, favor de intentar nuevamente.");
@@ -59,8 +60,23 @@ const setBrotherActivoStatus = async(req, res) => {
     }
 };
 
+const fetchBrotheresByCongregationAndActive = async(req, res) => {
+    try {
+        const fetchedBrothers = await brothers.find(req.body);
+        if(fetchedBrothers) {
+            res.status(201).json(fetchedBrothers)
+        } else {
+            res.status(400);
+            throw new Error("No se produjeron resultados.")
+        }
+    } catch (error) {
+        console.log(error)
+    }
+};
+
 module.exports = {
     createBrother,
     fetchBrothersByCongregation,
     setBrotherActivoStatus,
+    fetchBrotheresByCongregationAndActive
 }

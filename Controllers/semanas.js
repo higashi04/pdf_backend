@@ -17,7 +17,7 @@ const createWeek = async (req, res) => {
       //     res.status(400);
       //     throw new Error("Se produjo un error, favor de intentar nuevamente.");
       // }
-      console.log(week.fecha);
+      // console.log(week.fecha);
     });
   } catch (err) {
     console.log(err);
@@ -63,7 +63,7 @@ const fetchWeekData = async (req, res) => {
   const { id } = req.body;
   try {
     const findRol = await acomodadoresSchema.findById(id);
-    console.log(findRol);
+    // console.log(findRol);
     res.status(200).json(findRol);
   } catch (error) {
     res.status(500).json({ message: "error de servidor" });
@@ -103,7 +103,7 @@ const saveRol = async (req, res) => {
         throw new Error("Se produjo un error.")
     }
   } catch (error) {
-    
+    console.log(error)
   }
 };
 
