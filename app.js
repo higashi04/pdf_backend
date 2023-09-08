@@ -38,13 +38,16 @@ app.use(
   session({
     secret: process.env.SECRET,
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: true,,
+    store: store, 
+    // MongoStore.create({
+    //   mongoUrl: process.env.MONGO_SERVER,
+    // }),
     cookie: {
       httpOnly: true,
       expires: Date.now() + 1000 * 60 * 60 * 24,
       maxAge: 1000 * 60 * 60 * 24,
-    },
-    store: new MongoStore({mongoseConnection: mongoose.connection})
+    }
   })
 );
 
