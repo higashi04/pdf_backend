@@ -8,9 +8,11 @@ const bodyParser = require("body-parser");
 const MongoStore = require("connect-mongo");
 const mongoose = require("mongoose");
 
+//routes
 const usersRoutes = require("./Routes/user");
 const broRoutes = require("./Routes/bros");
 const semanasRoutes = require("./Routes/semanas");
+const territoriosRoutes = require("./Routes/territorios");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -68,6 +70,7 @@ app.use(cookieParser(process.env.SECRET));
 app.use("/usuario", usersRoutes);
 app.use("/bros", broRoutes);
 app.use("/semanas", semanasRoutes);
+app.use("/territorios", territoriosRoutes);
 
 const port = process.env.PORT || 8080;
 
