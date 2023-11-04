@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const Congregacion = require('./congregacion_model');
 
 const Schema = mongoose.Schema;
 
@@ -16,9 +17,10 @@ const TerritoriosSchema = new Schema({
     esquinaLongitudC: Number,
     esquinaLongitudD: Number,
     fechaCreacion: String,
-    // congregacion: {
-    //     typeof: Schema.Types
-    // }
+    congregacion: {
+        type: Schema.Types.ObjectId,
+        ref: `${Congregacion.modelName}`
+    }
 })
 
 TerritoriosSchema.virtual('center').get(function () {

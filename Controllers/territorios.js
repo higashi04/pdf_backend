@@ -57,6 +57,26 @@ const createTerritorio = async(req, res) => {
     }
 }
 
+const getByCongregacionId = async(req, res) => {
+    try {
+        const {congregacionId} = req.body
+    
+        const territorios = await Territorios.find({congregacion: congregacionId})
+
+        if(!territorios){
+            res.status(400)
+            throw new Error("Not Found")
+        }
+
+        res.status(201).json({
+            territorios
+        })
+    } catch (error) {
+        res.status(400).json({error})
+    }
+}
+
 module.exports = {
-    createTerritorio
+    createTerritorio,
+    getByCongregacionId
 }

@@ -13,6 +13,7 @@ const usersRoutes = require("./Routes/user");
 const broRoutes = require("./Routes/bros");
 const semanasRoutes = require("./Routes/semanas");
 const territoriosRoutes = require("./Routes/territorios");
+const congregacionesRoutes = require("./Routes/congregaciones");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -71,6 +72,7 @@ app.use("/usuario", usersRoutes);
 app.use("/bros", broRoutes);
 app.use("/semanas", semanasRoutes);
 app.use("/territorios", territoriosRoutes);
+app.use("/congregaciones", congregacionesRoutes);
 
 const port = process.env.PORT || 8080;
 

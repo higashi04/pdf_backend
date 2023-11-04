@@ -6,6 +6,7 @@ const brother = require("../models/bros");
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.TOKEN_SECRET, {
+    algorithm: 'RS256',
     expiresIn: "30d",
   });
 };
