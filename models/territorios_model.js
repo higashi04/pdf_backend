@@ -20,7 +20,11 @@ const TerritoriosSchema = new Schema({
     congregacion: {
         type: Schema.Types.ObjectId,
         ref: `${Congregacion.modelName}`
-    }
+    },
+    marcados: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Marcadas'
+    }]
 })
 
 TerritoriosSchema.virtual('center').get(function () {
