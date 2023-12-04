@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 
 const Schema = mongoose.Schema;
 
-const AncianoSchema = new Schema({
+const UserSchema = new Schema({
     username: {
         type: String,
         required: true,
@@ -24,4 +24,4 @@ const AncianoSchema = new Schema({
     congregacion: String
 });
 
-module.exports = mongoose.model('Anciano', AncianoSchema);
+module.exports = mongoose.model('User', UserSchema);

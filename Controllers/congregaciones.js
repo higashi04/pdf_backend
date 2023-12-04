@@ -33,6 +33,21 @@ const crearCongregacion = async(req, res) => {
     }
 }
 
+const consultarCongregaciones = async(req, res) => {
+    try{
+        const congregaciones = await Congregacion.find();
+
+        if(congregaciones) {
+            res.status(200).json(congregaciones)
+        } else {
+            res.status(500).json({error: "Server Error"});
+        }
+    }catch (error) {
+        throw error;
+    }
+};
+
 module.exports = {
-    crearCongregacion
+    crearCongregacion,
+    consultarCongregaciones
 }
