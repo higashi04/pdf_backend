@@ -8,17 +8,13 @@ const { mailBodyRegister } = require("../utilities/Emails");
 
 const mailRegister = async (mail, user, password) => {
   const smtpTransport = nodeMailer.createTransport({
-    service: "Gmail",
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
+    service: "Outlook",
+    host: process.env.MAIL_SERVER,
+    port: process.env.MAIL_PORT,
+    secure: false,
     auth: {
-      type: "OAuth2",
       user: process.env.MAIL,
-      pass: process.env.MAIL_PASSWORD,
-      clientId: process.env.OAUTH_CLIENTID,
-      clientSecret: process.env.OAUTH_CLIENT_SECRET,
-      refreshToken: process.env.OAUTH_REFRESH_TOKEN,
+      pass: process.env.MAIL_PASSWORD
     },
   });
   const mailOptions = {
@@ -115,11 +111,12 @@ const loginUser = async (req, res) => {
 const tryOutnodemailer = async (req, res) => {
   try {
     const { email } = req.body;
-    // await mailRegister(email);
-    console.log("biiiitch");
+    await mailRegister(email, "poncho", "qwerty");
+    console.log("test");
     res.status(200).json(req.body);
   } catch (error) {
     res.status(500);
+    console.log(error)
     throw new Error("This failed lol");
   }
 };
@@ -128,9 +125,65 @@ const getMe = async (req, res) => {
   res.status(200).json(req.user);
 };
 
+const getAllByCongregationId = async(req, res) => {
+  try{
+    const {congregacionId} = req.body.data;
+
+    const users = await User.find({congregacion: congregacionId}).populate({path: 'congregacion'})
+
+    if(!users) {
+      res.status(400);
+      throw new Error("Not Found")
+    }
+    console.log(users)
+    res.status(201).json({
+        users
+    })
+
+  } catch (error) {
+    res.status(500);
+    console.log(error)
+    throw new Error(error);
+  }
+};
+
+const updateUser = async(req, res) => {
+  try {
+    const { username, password, email, firstName, lastName, congregacion, id } =
+    req.body;
+  if ((!username, !password, !email, !firstName, !congregacion, !lastName)) {
+    res.status(400);
+    throw new Error("Favor de proporcionar todos los datos requeridos.");
+  }
+  console.log("update point")
+
+
+  const foundUser = await User.findById(id)
+
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  foundUser.username = username;
+  foundUser.password = hashedPassword;
+  foundUser.firstName = firstName;
+  foundUser.lastName = lastName;
+  foundUser.congregacion = congregacion
+
+  await foundUser.save();
+  res.status(201).json({foundUser})
+
+  } catch (error) {
+    res.status(500);
+    console.log(error)
+    throw new Error(error);
+  }
+}
+
 module.exports = {
   registerUser,
   loginUser,
   getMe,
   tryOutnodemailer,
+  getAllByCongregationId,
+  updateUser,
 };

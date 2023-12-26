@@ -112,8 +112,7 @@ const createMarcada = async(req, res) => {
 
 const getByCongregacionId = async(req, res) => {
     try {
-        const {congregacionId} = req.body
-        console.log(Marcadas.modelName)
+        const {congregacionId} = req.body.data
         const territorios = await Territorios.find({congregacion: congregacionId}).populate({path: 'marcados'})
 
         if(!territorios){
