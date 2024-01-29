@@ -7,27 +7,32 @@ const User = require("../models/users");
 const { mailBodyRegister } = require("../utilities/Emails");
 
 const mailRegister = async (mail, user, password) => {
-  const smtpTransport = nodeMailer.createTransport({
-    service: "Outlook",
-    host: process.env.MAIL_SERVER,
-    port: process.env.MAIL_PORT,
-    secure: false,
-    auth: {
-      user: process.env.MAIL,
-      pass: process.env.MAIL_PASSWORD
-    },
-  });
-  const mailOptions = {
-    to: mail,
-    from: process.env.MAIL,
-    subject: "Creación de cuenta",
-    html: mailBodyRegister(mail, user, password),
-    text: "we've been trying to reach you about your car insurance.",
-  };
-  console.log(mailOptions);
-  console.log(process.env.MAIL)
-  console.log(process.env.MAIL_PASSWORD)
-  smtpTransport.sendMail(mailOptions);
+  try{
+    const smtpTransport = nodeMailer.createTransport({
+      service: "Outlook",
+      host: process.env.MAIL_SERVER,
+      port: process.env.MAIL_PORT,
+      secure: false,
+      auth: {
+        user: process.env.MAIL,
+        pass: process.env.MAIL_PASSWORD
+      },
+    });
+    const mailOptions = {
+      to: mail,
+      from: process.env.MAIL,
+      subject: "Creación de cuenta",
+      html: mailBodyRegister(mail, user, password),
+    };
+    console.log(mailOptions);
+    console.log(process.env.MAIL)
+    console.log(process.env.MAIL_PASSWORD)
+    console.log(process.env.MAIL_PORT)
+    console.log(process.env.MAIL_SERVER)
+    await smtpTransport.sendMail(mailOptions);
+  } catch(error) {
+    console.error(error)
+  }
 };
 
 const generateToken = (id) => {
