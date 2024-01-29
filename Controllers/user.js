@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const nodeMailer = require("nodemailer");
 const User = require("../models/users");
+const Profile = require("../models/usuarioPerfil");
 // const brother = require("../models/bros");
 
 const { mailBodyRegister } = require("../utilities/Emails");
@@ -9,15 +10,17 @@ const { mailBodyRegister } = require("../utilities/Emails");
 const mailRegister = async (mail, user, password) => {
   try{
     const smtpTransport = nodeMailer.createTransport({
-      service: "Outlook",
+      service: "Zoho",
       host: process.env.MAIL_SERVER,
       port: process.env.MAIL_PORT,
-      secure: false,
+      secure: true,
+      
       auth: {
         user: process.env.MAIL,
         pass: process.env.MAIL_PASSWORD
       },
     });
+    console.log(smtpTransport)
     const mailOptions = {
       to: mail,
       from: process.env.MAIL,
@@ -25,29 +28,25 @@ const mailRegister = async (mail, user, password) => {
       html: mailBodyRegister(mail, user, password),
     };
     console.log(mailOptions);
-    console.log(process.env.MAIL)
-    console.log(process.env.MAIL_PASSWORD)
-    console.log(process.env.MAIL_PORT)
-    console.log(process.env.MAIL_SERVER)
     await smtpTransport.sendMail(mailOptions);
   } catch(error) {
     console.error(error)
   }
 };
 
-const generateToken = (id) => {
-  console.log('TOKEN_SECRET:', process.env.TOKEN_SECRET);
+// const generateToken = (id) => {
+//   console.log('TOKEN_SECRET:', process.env.TOKEN_SECRET);
 
-  return jwt.sign({ id }, process.env.TOKEN_SECRET, {
-    algorithm: "RS256",
-    expiresIn: "30d",
-  });
-};
+//   return jwt.sign({ id }, process.env.TOKEN_SECRET, {
+//     algorithm: "RS256",
+//     expiresIn: "30d",
+//   });
+// };
 
 const registerUser = async (req, res) => {
-  const { username, password, email, firstName, lastName, congregacion } =
+  const { username, password, email, firstName, lastName, congregacion, tipo } =
     req.body;
-  if ((!username, !password, !email, !firstName, !congregacion, !lastName)) {
+  if ((!username, !password, !email, !firstName, !congregacion, !lastName, !tipo)) {
     res.status(400);
     throw new Error("Favor de proporcionar todos los datos requeridos.");
   }
@@ -74,12 +73,9 @@ const registerUser = async (req, res) => {
     firstName,
     lastName,
     congregacion,
+    tipo
   });
-  // await brother.create({
-  //   nombre: `${firstName} ${lastName}`,
-  //   congregacion,
-  //   activo: true,
-  // })
+
   if (user) {
     mailRegister(email, username, password);
     res.status(201).json({
@@ -89,6 +85,7 @@ const registerUser = async (req, res) => {
       firstName: user.firstName,
       lastName: user.lastName,
       congregacion: user.congregacion,
+      tipo: user.tipo
       //token: generateToken(user._id),
     });
   } else {
@@ -98,21 +95,53 @@ const registerUser = async (req, res) => {
 };
 
 const loginUser = async (req, res) => {
-  const { username, password } = req.body;
-  const user = await User.findOne({ username });
-  if (user && (await bcrypt.compare(password, user.password))) {
-    res.json({
-      _id: user.id,
-      username: user.username,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      congregacion: user.congregacion,
-      //token: generateToken(user._id),
-    });
-  } else {
-    res.status(400);
-    throw new Error("Verifique su usuario y/o contraseña.");
+  try {
+    const { username, password } = req.body;
+    const user = await User.findOne({ username });
+    if (user && (await bcrypt.compare(password, user.password))) {
+  
+      const profile = await Profile.findById(user.tipo);
+      console.log(profile);
+      let isAdmin = false;
+      let canWrite = false;
+      let isReadOnly = false;
+  
+      switch (profile.tipo) {
+        case "admin":
+          isAdmin = true;
+          canWrite = true;
+          break;
+        case "write":
+          canWrite = true;
+          break;
+        case "readonly":
+          isReadOnly = true;
+          break;
+        default:
+          isReadOnly = true;
+          break;
+      }
+  
+      res.json({
+        _id: user.id,
+        username: user.username,
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        congregacion: user.congregacion,
+        tipo: user.tipo,
+        isAdmin: isAdmin,
+        canWrite: canWrite,
+        isReadOnly: isReadOnly
+      });
+    } else {
+      res.status(401);
+      throw new Error("Verifique su usuario y/o contraseña.");
+    }
+    
+  } catch (error) {
+    console.Error("Error in: ", error);
+    res.status(500).json({message: "Internal Server Error."})
   }
 };
 
@@ -141,7 +170,7 @@ const getAllByCongregationId = async(req, res) => {
   try{
     const {congregacionId} = req.body.data;
 
-    const users = await User.find({congregacion: congregacionId}).populate({path: 'congregacion'})
+    const users = await User.find({congregacion: congregacionId}).populate({path: 'congregacion'}).populate({path: 'tipo'})
 
     if(!users) {
       res.status(400);
@@ -161,9 +190,9 @@ const getAllByCongregationId = async(req, res) => {
 
 const updateUser = async(req, res) => {
   try {
-    const { username, password, email, firstName, lastName, congregacion, id } =
+    const { username, password, email, firstName, lastName, congregacion, id, tipo } =
     req.body;
-  if ((!username, !password, !email, !firstName, !congregacion, !lastName)) {
+  if ((!username, !password, !email, !firstName, !congregacion, !lastName, !tipo)) {
     res.status(400);
     throw new Error("Favor de proporcionar todos los datos requeridos.");
   }
@@ -180,10 +209,35 @@ const updateUser = async(req, res) => {
   foundUser.firstName = firstName;
   foundUser.lastName = lastName;
   foundUser.congregacion = congregacion
+  foundUser.tipo = tipo;
 
   await foundUser.save();
   res.status(201).json({foundUser})
 
+  } catch (error) {
+    res.status(500);
+    console.log(error)
+    throw new Error(error);
+  }
+}
+
+const getProfileTypes = async(req, res) => {
+  try {
+    // const perfiles = ["admin", "readonly", "write"]
+
+    // perfiles.forEach(async perfil => {
+    //   await Profile.create({
+    //     tipo: perfil
+    //   })
+    // })
+
+    const profiles = await Profile.find();
+    if(profiles) {
+      res.status(200).json({profiles})
+    } else {
+      res.status(500)
+      throw new Error("No data found")
+    }
   } catch (error) {
     res.status(500);
     console.log(error)
@@ -198,4 +252,5 @@ module.exports = {
   tryOutnodemailer,
   getAllByCongregationId,
   updateUser,
+  getProfileTypes,
 };

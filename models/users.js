@@ -24,7 +24,14 @@ const UserSchema = new Schema({
     congregacion: {
         type: Schema.Types.ObjectId,
         ref: 'Congregacion'
-    }
+    },
+    tipo: {
+        type: Schema.Types.ObjectId,
+        ref: 'UserProfile'
+    },
+    isAdmin: Boolean,
+    canWrite: Boolean,
+    isReadOnly: Boolean
 });
 
 module.exports = mongoose.model('User', UserSchema);
