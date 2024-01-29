@@ -35,7 +35,7 @@ const mailBodyRegister = (mail, user, password) => {
     "</head>"+
     "<body>"+
      "   <div class='header'>"+
-            "<h1>Your Company Name</h1>"+
+            "<h1>Aplicación Territorios</h1>"+
       "  </div>"+
         "<div class='content'>"+
             "<h2>Buen día,</h2>"+

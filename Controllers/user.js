@@ -24,6 +24,9 @@ const mailRegister = async (mail, user, password) => {
     html: mailBodyRegister(mail, user, password),
     text: "we've been trying to reach you about your car insurance.",
   };
+  console.log(mailOptions);
+  console.log(process.env.MAIL)
+  console.log(process.env.MAIL_PASSWORD)
   smtpTransport.sendMail(mailOptions);
 };
 
@@ -111,6 +114,10 @@ const loginUser = async (req, res) => {
 const tryOutnodemailer = async (req, res) => {
   try {
     const { email } = req.body;
+    console.log(req.body)
+    if(!email) {
+      throw new Error("body is empty")
+    }
     await mailRegister(email, "poncho", "qwerty");
     console.log("test");
     res.status(200).json(req.body);
