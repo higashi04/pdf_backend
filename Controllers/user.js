@@ -101,7 +101,7 @@ const loginUser = async (req, res) => {
     if (user && (await bcrypt.compare(password, user.password))) {
   
       const profile = await Profile.findById(user.tipo);
-      console.log(profile);
+     // console.log(profile);
       let isAdmin = false;
       let canWrite = false;
       let isReadOnly = false;
@@ -130,9 +130,9 @@ const loginUser = async (req, res) => {
         lastName: user.lastName,
         congregacion: user.congregacion,
         tipo: user.tipo,
-        isAdmin: isAdmin,
-        canWrite: canWrite,
-        isReadOnly: isReadOnly
+        isAdmin,
+        canWrite,
+        isReadOnly
       });
     } else {
       res.status(401);
@@ -176,7 +176,7 @@ const getAllByCongregationId = async(req, res) => {
       res.status(400);
       throw new Error("Not Found")
     }
-    console.log(users)
+    // console.log(users)
     res.status(201).json({
         users
     })
@@ -196,7 +196,7 @@ const updateUser = async(req, res) => {
     res.status(400);
     throw new Error("Favor de proporcionar todos los datos requeridos.");
   }
-  console.log("update point")
+  // console.log("update point")
 
 
   const foundUser = await User.findById(id)
