@@ -10,14 +10,17 @@ const { mailBodyRegister } = require("../utilities/Emails");
 const mailRegister = async (mail, user, password) => {
   try{
     const smtpTransport = nodeMailer.createTransport({
-      service: "Zoho",
+      //service: "Zoho",
       host: process.env.MAIL_SERVER,
       port: process.env.MAIL_PORT,
-      secure: true,
-      
+      //secure: true,
+      secureConnection: false,
       auth: {
         user: process.env.MAIL,
         pass: process.env.MAIL_PASSWORD
+      },
+      tls: {
+        ciphers: 'SSLv3',
       },
     });
     console.log(smtpTransport)
