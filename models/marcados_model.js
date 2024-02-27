@@ -7,7 +7,9 @@ const MarcadasSchema = new Schema({
     territorio: {
         type: Schema.Types.ObjectId,
         ref: 'Territorios'
-    }
+    },
+    comments: String,
+    address: String
 })
 
 module.exports = mongoose.model("Marcadas", MarcadasSchema)

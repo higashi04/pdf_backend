@@ -76,7 +76,7 @@ const createTerritorio = async (req, res) => {
 
 const createMarcada = async (req, res) => {
   try {
-    const { territory: territorio, lng, lat } = req.body;
+    const { territory: territorio, lng, lat, comments, address } = req.body;
 
     if (territorio === "" || lng === "" || lat === "") {
       res.status(400);
@@ -92,6 +92,8 @@ const createMarcada = async (req, res) => {
       lng,
       lat,
       territorio,
+      comments,
+      address
     });
 
     if (newMarked) {
@@ -100,7 +102,6 @@ const createMarcada = async (req, res) => {
         _id: territorio,
       }); 
       if (territorioParaAgregar) {
-        console.log("before trying to push");
         territorioParaAgregar.marcados.push(newMarked._id);
         await territorioParaAgregar.save();
 
@@ -136,6 +137,29 @@ const createMarcada = async (req, res) => {
     res.status(500).json({ error: error });
   }
 };
+
+const UpdateMarcada = async(req, res) => {
+  try {
+    const {id, address, comments} = req.body;
+    console.log(id)
+    const branded = await marcados_model.findById(id);
+    if (!branded) {
+      console.log("not found lolz")
+      res.status(400).json({ message: 'No se ha encontrado la direccion que no hay que visitar.'});
+      throw new Error( 'No se ha encontrado la direccion que no hay que visitar.' );
+    };
+
+    branded.address = address;
+    branded.comments = comments;
+    await branded.save();
+    console.log(branded)
+    res.status(204).json({...branded});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error });
+  }
+}
+
 
 const DeleteMarcada = async (req, res) => {
   try {
@@ -198,4 +222,5 @@ module.exports = {
   getByCongregacionId,
   createMarcada,
   DeleteMarcada,
+  UpdateMarcada,
 };
