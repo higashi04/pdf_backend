@@ -24,6 +24,10 @@ const TerritoriosSchema = new Schema({
     marcados: [{
         type: Schema.Types.ObjectId,
         ref: 'Marcadas'
+    }],
+    blocks: [{
+        type: Schema.Types.ObjectId,
+        ref: 'Blocks'
     }]
 })
 

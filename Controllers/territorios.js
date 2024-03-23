@@ -2,6 +2,9 @@ const Territorios = require("../models/territorios_model");
 const Marcadas = require("../models/marcados_model");
 const congregacion = require("../models/congregacion_model");
 const marcados_model = require("../models/marcados_model");
+const blockNumbers_model = require("../models/blockNumber");
+const blockNumber = require("../models/blockNumber");
+const territorios_model = require("../models/territorios_model");
 
 const createTerritorio = async (req, res) => {
   // console.log(req.body)
@@ -107,8 +110,7 @@ const createMarcada = async (req, res) => {
 
         const territory = await Territorios.findOne({
           _id: territorio,
-        }).populate({ path: "marcados" });
-        console.log(territory);
+        }).populate({ path: "marcados" }).populate({ path: "blocks" });
         res.status(201).json({
           _id: territory._id,
           nombre: territory.nombre,
@@ -123,6 +125,7 @@ const createMarcada = async (req, res) => {
           congregacion: territory.congregacion,
           center: territory.center,
           marcados: territory.marcados,
+          blocks: territory.blocks,
         });
       } else {
         res.status(500);
@@ -201,7 +204,7 @@ const getByCongregacionId = async (req, res) => {
     const { congregacionId } = req.body.data;
     const territorios = await Territorios.find({
       congregacion: congregacionId,
-    }).populate({ path: "marcados" });
+    }).populate({ path: "marcados" }).populate({ path: "blocks" });
 
     if (!territorios) {
       res.status(400);
@@ -217,10 +220,137 @@ const getByCongregacionId = async (req, res) => {
   }
 };
 
+const addNumberedBlock = async(req, res) => {
+  try {
+    const { lat, lng, territory, name } = req.body;
+
+    const blockExists = await blockNumbers_model.findOne({lat, lng});
+    if (blockExists) {
+      res.status(400);
+      throw new Error("Estos datos ya existen.");
+    }
+
+    const newBlock = await blockNumbers_model.create({lng, lat, territory, worked: false, name});
+
+    if(newBlock) {
+      const getTerritorio = await Territorios.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
+      getTerritorio.blocks.push(newBlock._id);
+      await getTerritorio.save();
+
+      const refreshTerritory = await Territorios.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
+      if(refreshTerritory) {
+        res.status(201).json({
+          _id: refreshTerritory._id,
+          nombre: refreshTerritory.nombre,
+          esquinaLatitudA: refreshTerritory.esquinaLatitudA,
+          esquinaLatitudB: refreshTerritory.esquinaLatitudB,
+          esquinaLatitudC: refreshTerritory.esquinaLatitudC,
+          esquinaLatitudD: refreshTerritory.esquinaLatitudD,
+          esquinaLongitudA: refreshTerritory.esquinaLongitudA,
+          esquinaLongitudB: refreshTerritory.esquinaLongitudB,
+          esquinaLongitudC: refreshTerritory.esquinaLongitudC,
+          esquinaLongitudD: refreshTerritory.esquinaLongitudD,
+          congregacion: refreshTerritory.congregacion,
+          center: refreshTerritory.center,
+          marcados: refreshTerritory.marcados,
+          blocks: refreshTerritory.blocks,
+        });
+      } else {
+        res.status(400);
+        throw new Error("Not Found");
+      }
+    }
+
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error });
+  }
+}
+
+const editNumberedBlock = async(req, res) => {
+  try {
+    const {blockId, territory, worked, name} = req.body;
+
+    const findBlock = await  blockNumbers_model.findById(blockId);
+
+    if(findBlock) {
+      findBlock.name = name;
+      findBlock.worked = worked;
+
+      await findBlock.save();
+
+      const findParentTerritory = await territorios_model.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
+      if(findParentTerritory) {
+        res.status(201).json({
+          _id: findParentTerritory._id,
+          nombre: findParentTerritory.nombre,
+          esquinaLatitudA: findParentTerritory.esquinaLatitudA,
+          esquinaLatitudB: findParentTerritory.esquinaLatitudB,
+          esquinaLatitudC: findParentTerritory.esquinaLatitudC,
+          esquinaLatitudD: findParentTerritory.esquinaLatitudD,
+          esquinaLongitudA: findParentTerritory.esquinaLongitudA,
+          esquinaLongitudB: findParentTerritory.esquinaLongitudB,
+          esquinaLongitudC: findParentTerritory.esquinaLongitudC,
+          esquinaLongitudD: findParentTerritory.esquinaLongitudD,
+          congregacion: findParentTerritory.congregacion,
+          center: findParentTerritory.center,
+          marcados: findParentTerritory.marcados,
+          blocks: findParentTerritory.blocks,
+        })
+      } else {
+        res.status(400);
+        throw new Error('Not found');
+      }
+    } else {
+      res.status(400);
+      throw new Error('Not found');
+    }
+  } catch (error) {
+    
+  }
+}
+
+const deleteNumberedBlock = async(req, res) => { 
+  try{
+    const {blockId, territory} = req.body;
+    
+    await blockNumber.findByIdAndDelete(blockId);
+    const getTerritorio = await Territorios.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
+    if(getTerritorio) {
+      res.status(201).json({
+        _id: getTerritorio._id,
+        nombre: getTerritorio.nombre,
+        esquinaLatitudA: getTerritorio.esquinaLatitudA,
+        esquinaLatitudB: getTerritorio.esquinaLatitudB,
+        esquinaLatitudC: getTerritorio.esquinaLatitudC,
+        esquinaLatitudD: getTerritorio.esquinaLatitudD,
+        esquinaLongitudA: getTerritorio.esquinaLongitudA,
+        esquinaLongitudB: getTerritorio.esquinaLongitudB,
+        esquinaLongitudC: getTerritorio.esquinaLongitudC,
+        esquinaLongitudD: getTerritorio.esquinaLongitudD,
+        congregacion: getTerritorio.congregacion,
+        center: getTerritorio.center,
+        marcados: getTerritorio.marcados,
+        blocks: getTerritorio.blocks,
+      });
+    } else {
+      res.status(400);
+      throw new Error("Not Found");
+    }
+  }
+  catch(error){
+    console.log(error);
+    res.status(400).json({ error });
+  }
+}
+
 module.exports = {
   createTerritorio,
   getByCongregacionId,
   createMarcada,
   DeleteMarcada,
   UpdateMarcada,
+  addNumberedBlock,
+  deleteNumberedBlock,
+  editNumberedBlock
 };
