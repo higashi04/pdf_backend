@@ -8,30 +8,9 @@ const territorios_model = require("../models/territorios_model");
 
 const createTerritorio = async (req, res) => {
   // console.log(req.body)
-  const {
-    nombre,
-    esquinaLatitudA,
-    esquinaLatitudB,
-    esquinaLatitudC,
-    esquinaLatitudD,
-    esquinaLongitudA,
-    esquinaLongitudB,
-    esquinaLongitudC,
-    esquinaLongitudD,
-    congregacion,
-  } = req.body;
+  const { nombre, congregacion } = req.body;
 
-  if (
-    !nombre ||
-    !esquinaLatitudA ||
-    !esquinaLatitudB ||
-    !esquinaLatitudC ||
-    !esquinaLatitudD ||
-    !esquinaLongitudA ||
-    !esquinaLongitudB ||
-    !esquinaLongitudC ||
-    !esquinaLongitudD
-  ) {
+  if (!nombre) {
     res.status(400);
     throw new Error("Favor de proporcionar todos los datos.");
   }
@@ -44,14 +23,6 @@ const createTerritorio = async (req, res) => {
 
   const newTerritory = await Territorios.create({
     nombre,
-    esquinaLatitudA,
-    esquinaLatitudB,
-    esquinaLatitudC,
-    esquinaLatitudD,
-    esquinaLongitudA,
-    esquinaLongitudB,
-    esquinaLongitudC,
-    esquinaLongitudD,
     congregacion,
     fechaCreacion: Date.now(),
   });
@@ -60,16 +31,7 @@ const createTerritorio = async (req, res) => {
     res.status(201).json({
       _id: newTerritory._id,
       nombre: newTerritory.nombre,
-      esquinaLatitudA: newTerritory.esquinaLatitudA,
-      esquinaLatitudB: newTerritory.esquinaLatitudB,
-      esquinaLatitudC: newTerritory.esquinaLatitudC,
-      esquinaLatitudD: newTerritory.esquinaLatitudD,
-      esquinaLongitudA: newTerritory.esquinaLongitudA,
-      esquinaLongitudB: newTerritory.esquinaLongitudB,
-      esquinaLongitudC: newTerritory.esquinaLongitudC,
-      esquinaLongitudD: newTerritory.esquinaLongitudD,
       congregacion: newTerritory.congregacion,
-      center: newTerritory.center,
     });
   } else {
     res.status(400);
@@ -96,36 +58,31 @@ const createMarcada = async (req, res) => {
       lat,
       territorio,
       comments,
-      address
+      address,
     });
 
     if (newMarked) {
-
       const territorioParaAgregar = await Territorios.findOne({
         _id: territorio,
-      }); 
+      });
       if (territorioParaAgregar) {
         territorioParaAgregar.marcados.push(newMarked._id);
         await territorioParaAgregar.save();
 
         const territory = await Territorios.findOne({
           _id: territorio,
-        }).populate({ path: "marcados" }).populate({ path: "blocks" });
+        })
+          .populate({ path: "marcados" })
+          .populate({ path: "blocks" })
+          .populate({ path: "lineas" });
         res.status(201).json({
           _id: territory._id,
           nombre: territory.nombre,
-          esquinaLatitudA: territory.esquinaLatitudA,
-          esquinaLatitudB: territory.esquinaLatitudB,
-          esquinaLatitudC: territory.esquinaLatitudC,
-          esquinaLatitudD: territory.esquinaLatitudD,
-          esquinaLongitudA: territory.esquinaLongitudA,
-          esquinaLongitudB: territory.esquinaLongitudB,
-          esquinaLongitudC: territory.esquinaLongitudC,
-          esquinaLongitudD: territory.esquinaLongitudD,
           congregacion: territory.congregacion,
           center: territory.center,
           marcados: territory.marcados,
           blocks: territory.blocks,
+          lineas: territory.lineas,
         });
       } else {
         res.status(500);
@@ -141,28 +98,31 @@ const createMarcada = async (req, res) => {
   }
 };
 
-const UpdateMarcada = async(req, res) => {
+const UpdateMarcada = async (req, res) => {
   try {
-    const {id, address, comments} = req.body;
-    console.log(id)
+    const { id, address, comments } = req.body;
+    console.log(id);
     const branded = await marcados_model.findById(id);
     if (!branded) {
-      console.log("not found lolz")
-      res.status(400).json({ message: 'No se ha encontrado la direccion que no hay que visitar.'});
-      throw new Error( 'No se ha encontrado la direccion que no hay que visitar.' );
-    };
+      console.log("not found lolz");
+      res.status(400).json({
+        message: "No se ha encontrado la direccion que no hay que visitar.",
+      });
+      throw new Error(
+        "No se ha encontrado la direccion que no hay que visitar."
+      );
+    }
 
     branded.address = address;
     branded.comments = comments;
     await branded.save();
-    console.log(branded)
-    res.status(204).json({...branded});
+    console.log(branded);
+    res.status(204).json({ ...branded });
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: error });
   }
-}
-
+};
 
 const DeleteMarcada = async (req, res) => {
   try {
@@ -172,22 +132,18 @@ const DeleteMarcada = async (req, res) => {
 
     const territory = await Territorios.findOne({
       _id: territorio,
-    }).populate({ path: "marcados" });
+    })
+      .populate({ path: "marcados" })
+      .populate({ path: "blocks" })
+      .populate({ path: "lineas" });
     if (territory) {
       res.status(201).json({
         _id: territory._id,
         nombre: territory.nombre,
-        esquinaLatitudA: territory.esquinaLatitudA,
-        esquinaLatitudB: territory.esquinaLatitudB,
-        esquinaLatitudC: territory.esquinaLatitudC,
-        esquinaLatitudD: territory.esquinaLatitudD,
-        esquinaLongitudA: territory.esquinaLongitudA,
-        esquinaLongitudB: territory.esquinaLongitudB,
-        esquinaLongitudC: territory.esquinaLongitudC,
-        esquinaLongitudD: territory.esquinaLongitudD,
         congregacion: territory.congregacion,
-        center: territory.center,
         marcados: territory.marcados,
+        blocks: territory.blocks,
+        lineas: territory.lineas,
       });
     } else {
       res.status(500);
@@ -204,7 +160,10 @@ const getByCongregacionId = async (req, res) => {
     const { congregacionId } = req.body.data;
     const territorios = await Territorios.find({
       congregacion: congregacionId,
-    }).populate({ path: "marcados" }).populate({ path: "blocks" });
+    })
+      .populate({ path: "marcados" })
+      .populate({ path: "blocks" })
+      .populate({ path: "lineas" });
 
     if (!territorios) {
       res.status(400);
@@ -220,103 +179,104 @@ const getByCongregacionId = async (req, res) => {
   }
 };
 
-const addNumberedBlock = async(req, res) => {
+const addNumberedBlock = async (req, res) => {
   try {
     const { lat, lng, territory, name } = req.body;
 
-    const blockExists = await blockNumbers_model.findOne({lat, lng});
+    const blockExists = await blockNumbers_model.findOne({ lat, lng });
     if (blockExists) {
       res.status(400);
       throw new Error("Estos datos ya existen.");
     }
 
-    const newBlock = await blockNumbers_model.create({lng, lat, territory, worked: false, name});
+    const newBlock = await blockNumbers_model.create({
+      lng,
+      lat,
+      territory,
+      worked: false,
+      name,
+    });
 
-    if(newBlock) {
-      const getTerritorio = await Territorios.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
+    if (newBlock) {
+      const getTerritorio = await Territorios.findById(territory)
+        .populate({ path: "marcados" })
+        .populate({ path: "blocks" })
+        .populate({ path: "lineas" });
       getTerritorio.blocks.push(newBlock._id);
       await getTerritorio.save();
 
-      const refreshTerritory = await Territorios.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
-      if(refreshTerritory) {
+      const refreshTerritory = await Territorios.findById(territory)
+        .populate({ path: "marcados" })
+        .populate({ path: "blocks" })
+        .populate({ path: "lineas" });
+      if (refreshTerritory) {
         res.status(201).json({
           _id: refreshTerritory._id,
           nombre: refreshTerritory.nombre,
-          esquinaLatitudA: refreshTerritory.esquinaLatitudA,
-          esquinaLatitudB: refreshTerritory.esquinaLatitudB,
-          esquinaLatitudC: refreshTerritory.esquinaLatitudC,
-          esquinaLatitudD: refreshTerritory.esquinaLatitudD,
-          esquinaLongitudA: refreshTerritory.esquinaLongitudA,
-          esquinaLongitudB: refreshTerritory.esquinaLongitudB,
-          esquinaLongitudC: refreshTerritory.esquinaLongitudC,
-          esquinaLongitudD: refreshTerritory.esquinaLongitudD,
           congregacion: refreshTerritory.congregacion,
-          center: refreshTerritory.center,
           marcados: refreshTerritory.marcados,
           blocks: refreshTerritory.blocks,
+          lineas: refreshTerritory.lineas,
         });
       } else {
         res.status(400);
         throw new Error("Not Found");
       }
     }
-
   } catch (error) {
     console.log(error);
     res.status(400).json({ error });
   }
-}
+};
 
-const editNumberedBlock = async(req, res) => {
+const editNumberedBlock = async (req, res) => {
   try {
-    const {blockId, territory, worked, name} = req.body;
+    const { blockId, territory, worked, name } = req.body;
 
-    const findBlock = await  blockNumbers_model.findById(blockId);
+    const findBlock = await blockNumbers_model.findById(blockId);
 
-    if(findBlock) {
+    if (findBlock) {
       findBlock.name = name;
       findBlock.worked = worked;
 
       await findBlock.save();
 
-      const findParentTerritory = await territorios_model.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
-      if(findParentTerritory) {
+      const findParentTerritory = await territorios_model
+        .findById(territory)
+        .populate({ path: "marcados" })
+        .populate({ path: "blocks" })
+        .populate({ path: "lineas" });
+      if (findParentTerritory) {
         res.status(201).json({
           _id: findParentTerritory._id,
           nombre: findParentTerritory.nombre,
-          esquinaLatitudA: findParentTerritory.esquinaLatitudA,
-          esquinaLatitudB: findParentTerritory.esquinaLatitudB,
-          esquinaLatitudC: findParentTerritory.esquinaLatitudC,
-          esquinaLatitudD: findParentTerritory.esquinaLatitudD,
-          esquinaLongitudA: findParentTerritory.esquinaLongitudA,
-          esquinaLongitudB: findParentTerritory.esquinaLongitudB,
-          esquinaLongitudC: findParentTerritory.esquinaLongitudC,
-          esquinaLongitudD: findParentTerritory.esquinaLongitudD,
           congregacion: findParentTerritory.congregacion,
           center: findParentTerritory.center,
           marcados: findParentTerritory.marcados,
           blocks: findParentTerritory.blocks,
-        })
+          horario: findParentTerritory.horario,
+          lineas: findParentTerritory.lineas,
+        });
       } else {
         res.status(400);
-        throw new Error('Not found');
+        throw new Error("Not found");
       }
     } else {
       res.status(400);
-      throw new Error('Not found');
+      throw new Error("Not found");
     }
-  } catch (error) {
-    
-  }
-}
+  } catch (error) {}
+};
 
-const deleteNumberedBlock = async(req, res) => { 
-  try{
-    const {blockId, territory} = req.body;
-    
+const deleteNumberedBlock = async (req, res) => {
+  try {
+    const { blockId, territory } = req.body;
+
     await blockNumber.findByIdAndDelete(blockId);
-    const getTerritorio = await Territorios.findById(territory).populate({ path: "marcados" }).populate({ path: "blocks" });
-    if(getTerritorio) {
+    const getTerritorio = await Territorios.findById(territory)
+      .populate({ path: "marcados" })
+      .populate({ path: "blocks" });
+    if (getTerritorio) {
       res.status(201).json({
         _id: getTerritorio._id,
         nombre: getTerritorio.nombre,
@@ -337,12 +297,11 @@ const deleteNumberedBlock = async(req, res) => {
       res.status(400);
       throw new Error("Not Found");
     }
-  }
-  catch(error){
+  } catch (error) {
     console.log(error);
     res.status(400).json({ error });
   }
-}
+};
 
 module.exports = {
   createTerritorio,
@@ -352,5 +311,5 @@ module.exports = {
   UpdateMarcada,
   addNumberedBlock,
   deleteNumberedBlock,
-  editNumberedBlock
+  editNumberedBlock,
 };
