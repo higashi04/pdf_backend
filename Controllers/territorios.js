@@ -44,13 +44,11 @@ const createMarcada = async (req, res) => {
     const { territory: territorio, lng, lat, comments, address } = req.body;
 
     if (territorio === "" || lng === "" || lat === "") {
-      res.status(400);
-      throw new Error("Favor de proporcionar todos los datos");
+      return res.status(400).json({message:"Favor de proporcionar todos los datos" });
     }
     const marcadoExists = await Marcadas.findOne({ lng, lat });
     if (marcadoExists) {
-      res.status(400);
-      throw new Error("Estos datos ya existen.");
+      return res.status(400).json({message: "Estos datos ya existen."});
     }
 
     const newMarked = await Marcadas.create({
@@ -265,7 +263,10 @@ const editNumberedBlock = async (req, res) => {
       res.status(400);
       throw new Error("Not found");
     }
-  } catch (error) {}
+  } catch (error) {
+    console.error(error);
+    res.status(400).json({ error });
+  }
 };
 
 const deleteNumberedBlock = async (req, res) => {
@@ -275,23 +276,17 @@ const deleteNumberedBlock = async (req, res) => {
     await blockNumber.findByIdAndDelete(blockId);
     const getTerritorio = await Territorios.findById(territory)
       .populate({ path: "marcados" })
-      .populate({ path: "blocks" });
+      .populate({ path: "blocks" })
+      .populate({ path: "lineas" });
     if (getTerritorio) {
       res.status(201).json({
         _id: getTerritorio._id,
         nombre: getTerritorio.nombre,
-        esquinaLatitudA: getTerritorio.esquinaLatitudA,
-        esquinaLatitudB: getTerritorio.esquinaLatitudB,
-        esquinaLatitudC: getTerritorio.esquinaLatitudC,
-        esquinaLatitudD: getTerritorio.esquinaLatitudD,
-        esquinaLongitudA: getTerritorio.esquinaLongitudA,
-        esquinaLongitudB: getTerritorio.esquinaLongitudB,
-        esquinaLongitudC: getTerritorio.esquinaLongitudC,
-        esquinaLongitudD: getTerritorio.esquinaLongitudD,
         congregacion: getTerritorio.congregacion,
         center: getTerritorio.center,
         marcados: getTerritorio.marcados,
         blocks: getTerritorio.blocks,
+        lineas: getTerritorio.lineas,
       });
     } else {
       res.status(400);

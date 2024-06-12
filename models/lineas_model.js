@@ -7,6 +7,6 @@ const LineasSchema = new Schema({
     lngOne: Number,
     latTwo: Number,
     lngTwo: Number
-})
+});
 
 module.exports = mongoose.model("Lineas", LineasSchema);

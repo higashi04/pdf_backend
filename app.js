@@ -14,6 +14,7 @@ const broRoutes = require("./Routes/bros");
 const semanasRoutes = require("./Routes/semanas");
 const territoriosRoutes = require("./Routes/territorios");
 const congregacionesRoutes = require("./Routes/congregaciones");
+const lineasRoutes = require("./Routes/lineas_routes");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -73,6 +74,7 @@ app.use("/bros", broRoutes);
 app.use("/semanas", semanasRoutes);
 app.use("/territorios", territoriosRoutes);
 app.use("/congregaciones", congregacionesRoutes);
+app.use("/lines", lineasRoutes);
 
 const port = process.env.PORT || 8080;
 
