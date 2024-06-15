@@ -34,6 +34,10 @@ const TerritoriosSchema = new Schema({
       ref: lineas.modelName,
     },
   ],
+  horario: {
+    type: Schema.Types.ObjectId,
+    ref: "horarios"
+  }
 });
 
 // TerritoriosSchema.virtual('center').get(function () {

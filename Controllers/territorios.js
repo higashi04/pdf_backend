@@ -44,11 +44,13 @@ const createMarcada = async (req, res) => {
     const { territory: territorio, lng, lat, comments, address } = req.body;
 
     if (territorio === "" || lng === "" || lat === "") {
-      return res.status(400).json({message:"Favor de proporcionar todos los datos" });
+      return res
+        .status(400)
+        .json({ message: "Favor de proporcionar todos los datos" });
     }
     const marcadoExists = await Marcadas.findOne({ lng, lat });
     if (marcadoExists) {
-      return res.status(400).json({message: "Estos datos ya existen."});
+      return res.status(400).json({ message: "Estos datos ya existen." });
     }
 
     const newMarked = await Marcadas.create({
@@ -72,6 +74,7 @@ const createMarcada = async (req, res) => {
         })
           .populate({ path: "marcados" })
           .populate({ path: "blocks" })
+          .populate({ path: "horario" })
           .populate({ path: "lineas" });
         res.status(201).json({
           _id: territory._id,
@@ -81,6 +84,7 @@ const createMarcada = async (req, res) => {
           marcados: territory.marcados,
           blocks: territory.blocks,
           lineas: territory.lineas,
+          horario: territory.horario,
         });
       } else {
         res.status(500);
@@ -102,7 +106,6 @@ const UpdateMarcada = async (req, res) => {
     console.log(id);
     const branded = await marcados_model.findById(id);
     if (!branded) {
-      console.log("not found lolz");
       res.status(400).json({
         message: "No se ha encontrado la direccion que no hay que visitar.",
       });
@@ -133,6 +136,7 @@ const DeleteMarcada = async (req, res) => {
     })
       .populate({ path: "marcados" })
       .populate({ path: "blocks" })
+      .populate({ path: "horario" })
       .populate({ path: "lineas" });
     if (territory) {
       res.status(201).json({
@@ -142,6 +146,7 @@ const DeleteMarcada = async (req, res) => {
         marcados: territory.marcados,
         blocks: territory.blocks,
         lineas: territory.lineas,
+        horario: territory.horario,
       });
     } else {
       res.status(500);
@@ -161,6 +166,7 @@ const getByCongregacionId = async (req, res) => {
     })
       .populate({ path: "marcados" })
       .populate({ path: "blocks" })
+      .populate({ path: "horario" })
       .populate({ path: "lineas" });
 
     if (!territorios) {
@@ -199,6 +205,7 @@ const addNumberedBlock = async (req, res) => {
       const getTerritorio = await Territorios.findById(territory)
         .populate({ path: "marcados" })
         .populate({ path: "blocks" })
+        .populate({ path: "horario" })
         .populate({ path: "lineas" });
       getTerritorio.blocks.push(newBlock._id);
       await getTerritorio.save();
@@ -206,6 +213,7 @@ const addNumberedBlock = async (req, res) => {
       const refreshTerritory = await Territorios.findById(territory)
         .populate({ path: "marcados" })
         .populate({ path: "blocks" })
+        .populate({ path: "horario" })
         .populate({ path: "lineas" });
       if (refreshTerritory) {
         res.status(201).json({
@@ -215,6 +223,7 @@ const addNumberedBlock = async (req, res) => {
           marcados: refreshTerritory.marcados,
           blocks: refreshTerritory.blocks,
           lineas: refreshTerritory.lineas,
+          horario: refreshTerritory.horario,
         });
       } else {
         res.status(400);
@@ -242,6 +251,7 @@ const editNumberedBlock = async (req, res) => {
       const findParentTerritory = await territorios_model
         .findById(territory)
         .populate({ path: "marcados" })
+        .populate({ path: "horario" })
         .populate({ path: "blocks" })
         .populate({ path: "lineas" });
       if (findParentTerritory) {
@@ -276,6 +286,7 @@ const deleteNumberedBlock = async (req, res) => {
     await blockNumber.findByIdAndDelete(blockId);
     const getTerritorio = await Territorios.findById(territory)
       .populate({ path: "marcados" })
+      .populate({ path: "horario" })
       .populate({ path: "blocks" })
       .populate({ path: "lineas" });
     if (getTerritorio) {
@@ -287,10 +298,52 @@ const deleteNumberedBlock = async (req, res) => {
         marcados: getTerritorio.marcados,
         blocks: getTerritorio.blocks,
         lineas: getTerritorio.lineas,
+        horario: getTerritorio.horario,
       });
     } else {
       res.status(400);
       throw new Error("Not Found");
+    }
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error });
+  }
+};
+
+const setSchedule = async (req, res) => {
+  try {
+    const { horario, territory } = req.body;
+
+    if (!horario || !territory) {
+      return res
+        .status(400)
+        .json({ message: "No se proporcionaron todos los datos requeridos" });
+    }
+
+    const territorio = await Territorios.findById(territory);
+    if (!territorio) {
+      return res.status(404).json({ message: "El territorio no existe" });
+    }
+
+    territorio.horario = horario;
+    await territorio.save();
+
+    const getTerritorio = await Territorios.findById(territory)
+      .populate({ path: "marcados" })
+      .populate({ path: "horario" })
+      .populate({ path: "blocks" })
+      .populate({ path: "lineas" });
+    if (getTerritorio) {
+      res.status(201).json({
+        _id: getTerritorio._id,
+        nombre: getTerritorio.nombre,
+        congregacion: getTerritorio.congregacion,
+        center: getTerritorio.center,
+        marcados: getTerritorio.marcados,
+        blocks: getTerritorio.blocks,
+        lineas: getTerritorio.lineas,
+        horario: getTerritorio.horario,
+      });
     }
   } catch (error) {
     console.log(error);
@@ -307,4 +360,5 @@ module.exports = {
   addNumberedBlock,
   deleteNumberedBlock,
   editNumberedBlock,
+  setSchedule,
 };
