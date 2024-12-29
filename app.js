@@ -71,14 +71,14 @@ mongoose.connection.on("error", (err) => {
   console.error("mongo error: \n", err);
 });
 app.use(cookieParser(process.env.SECRET));
-app.use("/api/usuario", usersRoutes);
-app.use("/api/bros", broRoutes);
-app.use("/api/semanas", semanasRoutes);
-app.use("/api/territorios", territoriosRoutes);
-app.use("/api/congregaciones", congregacionesRoutes);
-app.use("/api/lines", lineasRoutes);
-app.use("/api/horarios", horariosRoutes);
-app.use("/api/acomodadores", acomodadoresRoutes)
+app.use("/usuario", usersRoutes);
+app.use("/bros", broRoutes);
+app.use("/semanas", semanasRoutes);
+app.use("/territorios", territoriosRoutes);
+app.use("/congregaciones", congregacionesRoutes);
+app.use("/lines", lineasRoutes);
+app.use("/horarios", horariosRoutes);
+app.use("/acomodadores", acomodadoresRoutes);
 
 const port = process.env.PORT || 8080;
 
