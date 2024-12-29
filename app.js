@@ -16,6 +16,7 @@ const territoriosRoutes = require("./Routes/territorios");
 const congregacionesRoutes = require("./Routes/congregaciones");
 const lineasRoutes = require("./Routes/lineas_routes");
 const horariosRoutes = require("./Routes/horarios_routes");
+const acomodadoresRoutes = require("./Routes/acomodadores");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -77,6 +78,7 @@ app.use("/territorios", territoriosRoutes);
 app.use("/congregaciones", congregacionesRoutes);
 app.use("/lines", lineasRoutes);
 app.use("/horarios", horariosRoutes);
+app.use("/acomodadores", acomodadoresRoutes)
 
 const port = process.env.PORT || 8080;
 
