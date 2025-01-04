@@ -38,7 +38,7 @@ module.exports.UpdateAcomodador = async(req, res) => {
         if(!name) {
             return res.status(400).json({ message: "El nombre del acomodador es obligatorio."})
         }
-        const findAcomodador = await AcomodadoresSchema.findByIdAndUpdate(id, { name });
+        const findAcomodador = await AcomodadoresSchema.findByIdAndUpdate(id, { name }, { new: true });
         if(!findAcomodador) {
             return res.status(404).json({ message: "El acomodador no existe"});
         }
